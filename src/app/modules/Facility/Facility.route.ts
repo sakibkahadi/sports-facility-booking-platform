@@ -12,5 +12,10 @@ router.post(
   validateRequest(FacilityValidation.createFacilityValidation),
   FacilityControllers.createFacility,
 );
+router.put(
+  '/:id',
+  validateRequest(FacilityValidation.updateFacilityValidation),
+  FacilityControllers.updateFacility,
+);
 
 export const FacilityRoutes = router;
