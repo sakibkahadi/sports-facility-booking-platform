@@ -7,7 +7,7 @@ import config from '../config';
 import { UserModel } from '../modules/User/User.model';
 import { TUserRole } from '../modules/User/User.interface';
 
-export const auth = (requireRoles: TUserRole) => {
+export const auth = (...requireRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization;
 
