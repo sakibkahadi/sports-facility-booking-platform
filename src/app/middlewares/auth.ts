@@ -19,9 +19,10 @@ export const auth = (...requireRoles: TUserRole[]) => {
       token,
       config.jwt_access_secret as string,
     ) as JwtPayload;
-    const { role, userEmail } = decoded;
+    const { role, userId } = decoded;
 
-    const user = await UserModel.findOne({ email: userEmail });
+    const user = await UserModel.findById(userId);
+
     if (!user) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
     }
@@ -29,6 +30,8 @@ export const auth = (...requireRoles: TUserRole[]) => {
     if (requireRoles && !requireRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
     }
+
+    req.user = decoded;
     next();
   });
 };
