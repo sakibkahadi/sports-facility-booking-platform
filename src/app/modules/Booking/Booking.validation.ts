@@ -1,5 +1,13 @@
 import { z } from 'zod';
-const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+
+const dateStringRegex = z.string().refine(
+  (time) => {
+    const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+    return dateRegex.test(time);
+  },
+  { message: 'Invalid date format. Use yyyy-mm-dd.' },
+);
+
 const timeStringRegex = z.string().refine(
   (time) => {
     const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
@@ -11,9 +19,7 @@ const timeStringRegex = z.string().refine(
 const bookingValidationSchema = z.object({
   body: z
     .object({
-      date: z
-        .string()
-        .regex(dateRegex, { message: 'Invalid date format. Use yyyy-mm-dd.' }),
+      date: dateStringRegex,
       startTime: timeStringRegex,
       endTime: timeStringRegex,
     })

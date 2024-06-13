@@ -1,8 +1,9 @@
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
-import { TBooking } from './Booking.interface';
+import { TBooking, TSchedule } from './Booking.interface';
 import { FacilityModel } from '../Facility/Facility.model';
 import { BookingModel } from './Booking.model';
+import { hasTimeConflict } from './Booking.utils';
 
 const CreateBookingIntoDB = async (
   userId: string,
@@ -22,6 +23,25 @@ const CreateBookingIntoDB = async (
   const durationHours =
     (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60 * 60);
   const payableAmount = durationHours * isFacilityExist.pricePerHour;
+
+  const assignSchedules = await BookingModel.find({
+    facility,
+    date: { $in: date },
+  }).select('date startTime endTime');
+
+  const newSchedule = {
+    date,
+    startTime,
+    endTime,
+  };
+
+  if (hasTimeConflict(assignSchedules, newSchedule as TSchedule)) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      `This facility is not available at that time! choose other time or date`,
+    );
+  }
+
   const result = await BookingModel.create({
     facility,
     startTime,
@@ -33,6 +53,21 @@ const CreateBookingIntoDB = async (
   });
   return result;
 };
+const getAllBookingFromDB = async () => {
+  const result = await BookingModel.find()
+    .populate('facility')
+    .populate('user');
+  return result;
+};
+const getAllBookingByUser = async (logInUser: string) => {
+  const result = await BookingModel.findOne({ user: logInUser })
+    .populate('facility')
+    .populate('user');
+
+  return result;
+};
 export const BookingServices = {
   CreateBookingIntoDB,
+  getAllBookingFromDB,
+  getAllBookingByUser,
 };
