@@ -4,6 +4,7 @@ import { TBooking, TSchedule } from './Booking.interface';
 import { FacilityModel } from '../Facility/Facility.model';
 import { BookingModel } from './Booking.model';
 import { hasTimeConflict } from './Booking.utils';
+import { BOOKING_STATUS } from './Booking.constant';
 
 const CreateBookingIntoDB = async (
   userId: string,
@@ -66,8 +67,29 @@ const getAllBookingByUser = async (logInUser: string) => {
 
   return result;
 };
+const cancelABookingFromDB = async (id: string) => {
+  const bookingStatus = await BookingModel.findById(id);
+  if (bookingStatus?.isBooked === BOOKING_STATUS.canceled) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'This booking is already canceled',
+    );
+  }
+
+  const result = await BookingModel.findByIdAndUpdate(
+    id,
+    {
+      isBooked: BOOKING_STATUS.canceled,
+    },
+    { new: true },
+  )
+    .populate('facility')
+    .populate('user');
+  return result;
+};
 export const BookingServices = {
   CreateBookingIntoDB,
   getAllBookingFromDB,
   getAllBookingByUser,
+  cancelABookingFromDB,
 };
