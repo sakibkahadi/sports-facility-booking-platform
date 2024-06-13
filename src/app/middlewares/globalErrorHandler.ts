@@ -2,20 +2,22 @@
 /* eslint-disable no-unused-vars */
 import { ErrorRequestHandler } from 'express';
 import config from '../config';
-import { TErrorSources } from '../interface/error.interface';
+
 import { ZodError } from 'zod';
 import handleZodError from '../errors/handleZoderror';
 import handleValidationError from '../errors/handleValidationError';
 import handleCastError from '../errors/handleCastError';
 import handleDuplicateError from '../errors/handleDuplicateError';
 import AppError from '../errors/AppError';
+import { TErrorMessage } from '../interface/error.interface';
+import handleAuthError from '../errors/AuthError';
 
 const globalErrorHandlers: ErrorRequestHandler = (err, req, res, next) => {
   //setting default values
   let statusCode = 500;
   let message = 'Something went wrong!';
 
-  let errorSources: TErrorSources = [
+  let errorMessages: TErrorMessage = [
     { path: '', message: 'Something Went Wrong' },
   ];
 
@@ -23,26 +25,26 @@ const globalErrorHandlers: ErrorRequestHandler = (err, req, res, next) => {
     const simplifiedError = handleZodError(err);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
-    errorSources = simplifiedError?.errorSources;
+    errorMessages = simplifiedError?.errorMessages;
   } else if (err?.name === 'ValidationError') {
     const simplifiedError = handleValidationError(err);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
-    errorSources = simplifiedError?.errorSources;
+    errorMessages = simplifiedError?.errorMessages;
   } else if (err?.name === 'CastError') {
     const simplifiedError = handleCastError(err);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
-    errorSources = simplifiedError?.errorSources;
+    errorMessages = simplifiedError?.errorMessages;
   } else if (err?.code === 11000) {
     const simplifiedError = handleDuplicateError(err);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
-    errorSources = simplifiedError?.errorSources;
+    errorMessages = simplifiedError?.errorMessages;
   } else if (err instanceof AppError) {
     statusCode = err?.statusCode;
     message = err?.message;
-    errorSources = [
+    errorMessages = [
       {
         path: '',
         message: err?.message,
@@ -50,7 +52,7 @@ const globalErrorHandlers: ErrorRequestHandler = (err, req, res, next) => {
     ];
   } else if (err instanceof Error) {
     message = err?.message;
-    errorSources = [
+    errorMessages = [
       {
         path: '',
         message: err?.message,
@@ -62,8 +64,7 @@ const globalErrorHandlers: ErrorRequestHandler = (err, req, res, next) => {
     success: false,
     statusCode: statusCode,
     message,
-    errorSources,
-    err,
+    errorMessages,
     stack: config.NODE_ENV === 'development' ? err?.stack : null,
   });
 };

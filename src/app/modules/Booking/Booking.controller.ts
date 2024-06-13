@@ -5,9 +5,11 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { BookingServices } from './Booking.service';
 import AppError from '../../errors/AppError';
+import { CheckAvailabilityServices } from '../check-availability/Check-availability.service';
 
 const createBookings = catchAsync(async (req, res, next) => {
   const { userId } = req.user;
+
   const result = await BookingServices.CreateBookingIntoDB(userId, req.body);
 
   sendResponse(res, {
@@ -19,19 +21,15 @@ const createBookings = catchAsync(async (req, res, next) => {
 });
 const getAllBookings = catchAsync(async (req, res, next) => {
   const result = await BookingServices.getAllBookingFromDB();
-  if (result.length === 0) {
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'No Data found',
-      data: [result],
-    });
-  }
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    // statusCode: httpStatus.OK,
+    statusCode: result.length > 0 || result === null ? 200 : 404,
     success: true,
-    message: 'Booking retrieved successfully',
+    message:
+      result.length > 0 || result === null
+        ? 'Booking retrieve successfully '
+        : 'No Data found',
     data: result,
   });
 });

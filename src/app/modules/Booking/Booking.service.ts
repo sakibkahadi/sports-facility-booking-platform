@@ -17,7 +17,7 @@ const CreateBookingIntoDB = async (
 
   // Find the facility to get the pricePerHour
   const isFacilityExist = await FacilityModel.findById(facility);
-  if (!isFacilityExist) {
+  if (!isFacilityExist || isFacilityExist.isDeleted === true) {
     throw new AppError(httpStatus.NOT_FOUND, 'Facility not found');
   }
 
@@ -61,7 +61,7 @@ const getAllBookingFromDB = async () => {
   return result;
 };
 const getAllBookingByUser = async (logInUser: string) => {
-  const result = await BookingModel.findOne({ user: logInUser })
+  const result = await BookingModel.find({ user: logInUser })
     .populate('facility')
     .populate('user');
 
@@ -69,6 +69,10 @@ const getAllBookingByUser = async (logInUser: string) => {
 };
 const cancelABookingFromDB = async (id: string) => {
   const bookingStatus = await BookingModel.findById(id);
+
+  if (!bookingStatus) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This bookings is not found ');
+  }
   if (bookingStatus?.isBooked === BOOKING_STATUS.canceled) {
     throw new AppError(
       httpStatus.NOT_FOUND,

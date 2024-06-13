@@ -17,11 +17,14 @@ const createFacility = catchAsync(async (req, res, next) => {
 });
 const getAllFacility = catchAsync(async (req, res, next) => {
   const result = await FacilityServices.getAllFacilityFromDB();
-
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    // statusCode: httpStatus.OK,
+    statusCode: result.length > 0 || result === null ? 200 : 404,
     success: true,
-    message: 'Facility retrieved successfully',
+    message:
+      result.length > 0 || result === null
+        ? 'Facility retrieve successfully '
+        : 'No Data found',
     data: result,
   });
 });
