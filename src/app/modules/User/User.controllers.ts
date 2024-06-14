@@ -25,8 +25,8 @@ const loginUser = catchAsync(async (req, res, next) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'User login successfully',
-    token: 'JWT_TOKEN',
+    message: 'User logged in successfully',
+    token: accessToken,
     data: isUserExist,
   });
 });

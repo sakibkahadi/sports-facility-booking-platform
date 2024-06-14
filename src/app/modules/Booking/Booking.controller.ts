@@ -44,9 +44,13 @@ const getAllBookingsByUser = catchAsync(async (req, res, next) => {
   const result = await BookingServices.getAllBookingByUser(logInUser);
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    // statusCode: httpStatus.OK,
+    statusCode: result.length > 0 || result === null ? 200 : 404,
     success: true,
-    message: 'Booking retrieved successfully',
+    message:
+      result.length > 0 || result === null
+        ? 'Booking retrieve successfully '
+        : 'No Data found',
     data: result,
   });
 });

@@ -5,20 +5,17 @@ import {
 } from '../interface/error.interface';
 
 const handleDuplicateError = (err: any): TGenericErrorResponse => {
-  const match = err.message.match(/"([^"]*)"/);
-  const extractedMessage = match && match[1];
-
   const errorMessages: TErrorMessage = [
     {
       path: '',
-      message: `${extractedMessage} is already exists`,
+      message: err.errmsg,
     },
   ];
 
   const statusCode = 400;
   return {
     statusCode,
-    message: 'Duplicate Key',
+    message: err.errmsg,
     errorMessages: errorMessages,
   };
 };
