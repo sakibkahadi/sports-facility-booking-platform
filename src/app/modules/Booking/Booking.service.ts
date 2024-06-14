@@ -61,7 +61,10 @@ const getAllBookingFromDB = async () => {
   return result;
 };
 const getAllBookingByUser = async (logInUser: string) => {
-  const result = await BookingModel.find({ user: logInUser })
+  const result = await BookingModel.find({
+    user: logInUser,
+    isBooked: BOOKING_STATUS.confirmed,
+  })
     .populate('facility')
     .populate('user');
 
